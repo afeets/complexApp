@@ -1,5 +1,6 @@
 const postsCollection = require('../db').db().collection('posts')
 const ObjectId = require('mongodb').ObjectId
+const User = require('./User')
 
 let Post = function(data, userId){
     this.data = data
@@ -44,6 +45,57 @@ Post.prototype.create = function(){
         }else{
             // errors found
             reject(this.errors)
+        }
+    })
+}
+
+Post.findSingleById = function(id){
+    return new Promise(async function(resolve, reject){
+        if(typeof(id) != "string" || !ObjectId.isValid(id) ){
+            reject()
+            return
+        }
+        
+        // let post = await postsCollection.findOne({ _id: new ObjectId(id)})
+        
+        // required to get user object properties, use aggregate to 
+        // run multiple operations
+        let posts = await postsCollection.aggregate([
+            {$match: { _id: new ObjectId(id)}},
+            {$lookup: { from: "users", localField: "author", foreignField: "_id", as: "authorDocument" }},
+            {$project: {
+                title: 1,
+                body: 1,
+                createdDate: 1,
+                author: {$arrayElemAt: ["$authorDocument", 0]}
+
+            }}
+        ]).toArray()
+
+
+        // cleanup author property in each post object
+        posts = posts.map(function(post){
+            post.author = {
+                username: post.author.username,
+                avatar: new User(post.author, true).avatar
+            }
+
+            return post
+        })
+
+        if(posts.length){
+            console.log(posts[0])
+            resolve(posts[0])
+        }
+        else {
+            reject()
+        }
+
+        if(posts){
+            resolve(posts)
+        } 
+        else {
+            reject()
         }
     })
 }
