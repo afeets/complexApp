@@ -42,13 +42,22 @@ exports.logout = function(req, res){
 
 exports.register = function(req, res){
     let user = new User(req.body)
-    user.register()
-    if( user.errors.length ){
-        res.send(user.errors)
-    }
-    else {
-        res.send('Congrats')
-    }
+    user.register().then(() => {
+        req.session.user = { username: user.data.username }
+        // manually save session
+        req.session.save(function(){
+            res.redirect('/')
+        })
+    }).catch((regErrors) => {
+        // work with validation errors
+        regErrors.forEach(function(err){
+            req.flash('regErrors', err)
+        })
+        // manually save session
+        req.session.save(function(){
+            res.redirect('/')
+        })
+    })
 }
 
 exports.home = function(req, res){
@@ -57,6 +66,6 @@ exports.home = function(req, res){
     }
     else {
         // req.flash will send contents of errors, and then delete from session
-        res.render('home-guest', { errors: req.flash('errors')})
+        res.render('home-guest', { errors: req.flash('errors'), regErrors: req.flash('regErrors')})
     }
 }
