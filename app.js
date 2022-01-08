@@ -15,6 +15,13 @@ let sessionOptions = session({
 app.use(sessionOptions)
 app.use(flash())
 
+// run this function for every request
+app.use(function(req, res, next){
+    // object property available within ejs objects
+    res.locals.user = req.session.user
+    next()
+})
+
 const router = require('./router')
 
 app.use(express.urlencoded({ extended: false }))

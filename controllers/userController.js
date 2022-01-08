@@ -31,6 +31,19 @@ exports.login = function(req, res){
     })
 }
 
+exports.mustBeLoggedIn = function(req, res, next){
+    if(req.session.user){
+        // user is logged in so, move to the next called function 
+        next()
+    }
+    else{
+        req.flash("errors","You must be logged in to perform that action")
+        req.session.save(function(){
+            res.redirect('/')
+        })
+    }
+}
+
 exports.logout = function(req, res){
     // callback function to redirect to homepage
     req.session.destroy(function(){
@@ -62,7 +75,7 @@ exports.register = function(req, res){
 
 exports.home = function(req, res){
     if( req.session.user ){
-        res.render('home-dashboard', { username: req.session.user.username, avatar: req.session.user.avatar })
+        res.render('home-dashboard')
     }
     else {
         // req.flash will send contents of errors, and then delete from session
