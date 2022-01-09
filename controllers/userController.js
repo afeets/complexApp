@@ -1,4 +1,5 @@
 const User = require('../models/User')
+const Post = require('../models/Post')
 
 
 // using Callback Function
@@ -81,4 +82,28 @@ exports.home = function(req, res){
         // req.flash will send contents of errors, and then delete from session
         res.render('home-guest', { errors: req.flash('errors'), regErrors: req.flash('regErrors')})
     }
+}
+
+exports.ifUserExists = function(req, res, next){
+    User.findByUsername(req.params.username).then(function(userDocument){
+        req.profileUser = userDocument
+        next()
+    }).catch(function(){
+        res.render("404")
+    })
+}
+
+exports.profilePostsScreen = function(req, res){
+    // ask our Post model for post by author ID
+    Post.findByAuthorId(req.profileUser._id).then(function(posts){
+        res.render('profile', {
+            posts: posts,
+            profileUsername: req.profileUser.username,
+            profileAvatar: req.profileUser.avatar
+        })
+    }).catch(function(){
+        res.render("404")
+    })
+    
+    
 }

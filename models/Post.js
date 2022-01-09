@@ -49,19 +49,12 @@ Post.prototype.create = function(){
     })
 }
 
-Post.findSingleById = function(id){
+
+Post.reusablePostQuery = function(uniqueOperations){
     return new Promise(async function(resolve, reject){
-        if(typeof(id) != "string" || !ObjectId.isValid(id) ){
-            reject()
-            return
-        }
         
         // let post = await postsCollection.findOne({ _id: new ObjectId(id)})
-        
-        // required to get user object properties, use aggregate to 
-        // run multiple operations
-        let posts = await postsCollection.aggregate([
-            {$match: { _id: new ObjectId(id)}},
+        let aggOperations = uniqueOperations.concat([
             {$lookup: { from: "users", localField: "author", foreignField: "_id", as: "authorDocument" }},
             {$project: {
                 title: 1,
@@ -70,7 +63,11 @@ Post.findSingleById = function(id){
                 author: {$arrayElemAt: ["$authorDocument", 0]}
 
             }}
-        ]).toArray()
+        ])
+
+        // required to get user object properties, use aggregate to 
+        // run multiple operations
+        let posts = await postsCollection.aggregate(aggOperations).toArray()
 
 
         // cleanup author property in each post object
@@ -82,6 +79,21 @@ Post.findSingleById = function(id){
 
             return post
         })
+
+        resolve(posts)       
+    })
+}
+
+Post.findSingleById = function(id){
+    return new Promise(async function(resolve, reject){
+        if(typeof(id) != "string" || !ObjectId.isValid(id) ){
+            reject()
+            return
+        }
+        
+        let posts = await Post.reusablePostQuery([
+            {$match: {_id: new ObjectId(id)}}
+        ])
 
         if(posts.length){
             console.log(posts[0])
@@ -98,6 +110,13 @@ Post.findSingleById = function(id){
             reject()
         }
     })
+}
+
+Post.findByAuthorId = function(authorId){
+    return Post.reusablePostQuery([
+        {$match: {author: authorId}},
+        {$sort: {createdDate: -1}}
+    ])
 }
 
 module.exports = Post
