@@ -80,7 +80,7 @@ exports.home = function(req, res){
     }
     else {
         // req.flash will send contents of errors, and then delete from session
-        res.render('home-guest', { errors: req.flash('errors'), regErrors: req.flash('regErrors')})
+        res.render('home-guest', {regErrors: req.flash('regErrors')})
     }
 }
 

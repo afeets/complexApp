@@ -17,7 +17,14 @@ app.use(flash())
 
 // run this function for every request
 app.use(function(req, res, next){
-    // object property available within ejs objects
+    // make all error / success flash messages available
+    res.locals.errors = req.flash("errors")
+    res.locals.success = req.flash("success")
+
+    // make current user id available on req object
+    if(req.session.user){ req.visitorId = req.session.user._id} else { req.visitorId = 0 }
+
+    // make user session data available from within templates
     res.locals.user = req.session.user
     next()
 })
