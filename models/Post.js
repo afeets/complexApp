@@ -36,8 +36,8 @@ Post.prototype.create = function(){
 
         if(!this.errors.length){
             // save post into DB
-            postsCollection.insertOne(this.data).then(() => {
-                resolve()
+            postsCollection.insertOne(this.data).then((info) => {
+                resolve(info.insertedId)
             }).catch(() => {
                 this.errors.push("Please try again later")
                 reject(this.errors)
