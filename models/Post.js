@@ -104,7 +104,7 @@ Post.prototype.actuallyUpdate = function(){
     })    
 }
 
-Post.reusablePostQuery = function(uniqueOperations, visitorId){
+Post.reusablePostQuery = function(uniqueOperations, visitorId, finalOperations = []){
     return new Promise(async function(resolve, reject){
         
         // let post = await postsCollection.findOne({ _id: new ObjectId(id)})
@@ -117,7 +117,7 @@ Post.reusablePostQuery = function(uniqueOperations, visitorId){
                 authorId: "$author",
                 author: {$arrayElemAt: ["$authorDocument", 0]}
             }}
-        ])
+        ]).concat(finalOperations)
 
         // required to get user object properties, use aggregate to 
         // run multiple operations
@@ -127,6 +127,7 @@ Post.reusablePostQuery = function(uniqueOperations, visitorId){
         posts = posts.map(function(post){
             // return true / false 
             post.isVisitorOwner = post.authorId.equals(visitorId)
+            post.authorId = undefined
 
             post.author = {
                 username: post.author.username,
@@ -175,6 +176,18 @@ Post.findByAuthorId = function(authorId){
     ])
 }
 
+Post.search = function(searchTerm){
+    return new Promise(async (resolve, reject) => {
+        if(typeof(searchTerm) == "string"){
 
+            let posts = await Post.reusablePostQuery([
+                {$match: {$text: { $search: searchTerm }}}                
+            ], undefined, [{$sort: { score: { $meta: "textScore" }}}])
+            resolve(posts)
+        }else{
+            reject()
+        }
+    }) 
+}
 
 module.exports = Post
