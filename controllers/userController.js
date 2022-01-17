@@ -90,9 +90,11 @@ exports.register = function(req, res){
     })
 }
 
-exports.home = function(req, res){
+exports.home = async function(req, res){
     if( req.session.user ){
-        res.render('home-dashboard')
+        // fetch feed of posts for current user
+        let posts = await Post.getFeed(req.session.user._id)
+        res.render('home-dashboard', { posts: posts})
     }
     else {
         // req.flash will send contents of errors, and then delete from session
