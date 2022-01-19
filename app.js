@@ -67,7 +67,8 @@ io.on('connection', function(socket){
         socket.on('chatMessageFromBrowser', function(data){
             // console.log(data.message)
             // send out to all connected users
-            socket.broadcast.emit('chatMessageFromServer', { message: data.message, username: user.username, avatar: user.avatar })
+            // sanitize message
+            socket.broadcast.emit('chatMessageFromServer', { message: sanitizeHTML(data.message, { allowedTags: [], allowedAttributes: {}}), username: user.username, avatar: user.avatar })
         })    
     }
 })
