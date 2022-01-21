@@ -3,6 +3,7 @@ import axios from 'axios'
 
 export default class RegistrationForm {
     constructor(){
+        this.form = document.querySelector("#registration-form")
         this.allFields = document.querySelectorAll("#registration-form .form-control")
         this.insertValidationElements()
         this.username = document.querySelector("#username-register")
@@ -11,11 +12,19 @@ export default class RegistrationForm {
         this.email.previousValue = ''
         this.password = document.querySelector("#password-register")
         this.password.previousValue = ''
+        this.username.isUnique = false
+        this.email.isUnique = false
         this.events()
     }
 
     // events
     events(){
+        this.form.addEventListener("submit", (e) => {
+            e.preventDefault()
+            this.formSubmitHandler()
+        })
+
+
         // alert('registration form js is running')
         this.username.addEventListener("keyup", () => {
             this.isDifferent(this.username, this.usernameHandler)
@@ -28,10 +37,44 @@ export default class RegistrationForm {
         this.password.addEventListener("keyup", () => {
             this.isDifferent(this.password, this.passwordHandler)
         })
+
+         // alert('registration form js is running')
+         this.username.addEventListener("blur", () => {
+            this.isDifferent(this.username, this.usernameHandler)
+        })
+
+        this.email.addEventListener("blur", () => {
+            this.isDifferent(this.email, this.emailHandler)
+        })
+
+        this.password.addEventListener("blur", () => {
+            this.isDifferent(this.password, this.passwordHandler)
+        })
+
     }
 
 
     // methods
+
+    formSubmitHandler(){
+        this.usernameImmediately()
+        this.usernameAfterDelay()
+        this.emailAfterDelay()
+        this.passwordImmediately()
+        this.passwordAfterDelay()
+
+        if(
+            this.username.isUnique && 
+            !this.username.errors && 
+            this.email.isUnique &&
+            this.email.errors &&
+            this.password.errors
+        ){
+            this.form.submit()
+        }
+    }
+
+
     insertValidationElements(){
         this.allFields.forEach(function(element) {
             element.insertAdjacentHTML('afterend', '<div class="alert alert-danger small liveValidateMessage"></div>')
