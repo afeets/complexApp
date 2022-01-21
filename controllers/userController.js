@@ -21,6 +21,13 @@ exports.doesUsernameExist = function(req, res){
     })
 }
 
+exports.doesEmailExist = async function(req, res){
+    let bool = await User.doesEmailExist(req.body.email)
+    res.json(bool)
+}
+
+
+
 
 // using Promise 
 exports.login = function(req, res){
