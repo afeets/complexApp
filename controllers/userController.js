@@ -49,6 +49,19 @@ exports.login = function(req, res){
     })
 }
 
+
+// API Login 
+exports.apiLogin = function(req, res){
+    let user = new User(req.body)
+    user.login().then(function(result){
+        res.json("Good Job")    
+    }).catch(function(err){
+        res.json("Bad Job")
+    })
+}
+
+
+
 exports.mustBeLoggedIn = function(req, res, next){
     if(req.session.user){
         // user is logged in so, move to the next called function 
