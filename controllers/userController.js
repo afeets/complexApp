@@ -3,10 +3,6 @@ const Post = require('../models/Post')
 const Follow = require('../models/Follow')
 const jwt = require('jsonwebtoken')
 
-// allow api to be used from any domain
-const cors = require('cors')
-apiRouter.use(cors())
-
 
 // using Callback Function
 /*
