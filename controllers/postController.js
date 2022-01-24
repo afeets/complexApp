@@ -18,6 +18,19 @@ exports.create = function (req, res){
     })
 }
 
+
+exports.apiCreate = function (req, res){
+    let post = new Post(req.body, req.apiUser._id)
+    // setup promise
+    post.create().then(function(newId){
+        res.json('Congrats')
+    }).catch(function(err){
+        res.json(err)
+    })
+}
+
+
+
 exports.viewSingle = async function(req, res){
     // res.render('single-post-screen')
     try {

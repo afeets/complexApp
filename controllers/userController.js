@@ -1,6 +1,7 @@
 const User = require('../models/User')
 const Post = require('../models/Post')
 const Follow = require('../models/Follow')
+const jwt = require('jsonwebtoken')
 
 
 // using Callback Function
@@ -54,7 +55,8 @@ exports.login = function(req, res){
 exports.apiLogin = function(req, res){
     let user = new User(req.body)
     user.login().then(function(result){
-        res.json("Good Job")    
+        // return web tokem
+        res.json(jwt.sign({ _id: user.data._id }, process.env.JWTSECRET, { expiresIn: '60m' }))    
     }).catch(function(err){
         res.json("Bad Job")
     })
@@ -72,6 +74,18 @@ exports.mustBeLoggedIn = function(req, res, next){
         req.session.save(function(){
             res.redirect('/')
         })
+    }
+}
+
+
+exports.apiMustBeLoggedIn = function(req, res, next){
+    try{
+        // verify incoming token
+        req.apiUser = jwt.verify( req.body.token, process.env.JWTSECRET)
+        next()
+    }
+    catch{
+        res.json("Sorry, you must provide valid token.")
     }
 }
 
