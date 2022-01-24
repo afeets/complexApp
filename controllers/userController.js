@@ -3,6 +3,10 @@ const Post = require('../models/Post')
 const Follow = require('../models/Follow')
 const jwt = require('jsonwebtoken')
 
+// allow api to be used from any domain
+const cors = require('cors')
+apiRouter.use(cors())
+
 
 // using Callback Function
 /*
@@ -21,6 +25,18 @@ exports.doesUsernameExist = function(req, res){
         res.json(false)
     })
 }
+
+exports.apiGetPostsByUsername = async function(req, res){
+    try{
+        let authorDoc = await User.findByUsername(req.params.username)
+        let posts = await Post.findByAuthorId(authorDoc._id)
+        res.json(posts)
+    }
+    catch{
+        res.json('Sorry invalid user requested')
+    }
+}
+
 
 exports.doesEmailExist = async function(req, res){
     let bool = await User.doesEmailExist(req.body.email)
